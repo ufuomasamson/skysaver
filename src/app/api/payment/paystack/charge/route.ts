@@ -10,10 +10,10 @@ async function getPaystackSecretKey(): Promise<string> {
     .from(TABLES.PAYMENT_GATEWAYS)
     .select('*')
     .eq('name', 'paystack')
-    .eq('type', 'test_secret'); // Use test key for now, can be changed to live_secret for production
+    .eq('type', 'live_secret'); // Use live key for production
 
   if (error || !keys || keys.length === 0) {
-    throw new Error('Paystack secret key not found. Please configure in admin dashboard.');
+    throw new Error('Paystack live secret key not found. Please configure in admin dashboard.');
   }
 
   return keys[0].api_key;

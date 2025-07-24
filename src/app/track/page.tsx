@@ -674,9 +674,9 @@ export default function TrackFlightPage() {
                   {!booking?.paid && (
                     <div className="space-y-4 mt-6">
                       <h4 className="font-bold text-lg text-[#18176b]">Pay For Flight</h4>
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
-                        <div className="text-sm text-yellow-800">
-                          <strong>🧪 Test Mode:</strong> Payment will be charged $1 USD for testing purposes.
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                        <div className="text-sm text-green-800">
+                          <strong>💳 Live Payment:</strong> You will be charged the actual flight price: {flight ? formatPrice(flight.price, flight.currency) : 'Loading...'}
                         </div>
                       </div>
                       <button
@@ -684,7 +684,7 @@ export default function TrackFlightPage() {
                         onClick={handleOpenPaymentModal}
                         disabled={paymentLoading}
                       >
-                        {paymentLoading ? "Processing..." : "Pay For Flight (Test Mode - $1)"}
+                        {paymentLoading ? "Processing..." : `Pay For Flight - ${flight ? formatPrice(flight.price, flight.currency) : 'Loading...'}`}
                       </button>
                     </div>
                   )}
@@ -850,8 +850,8 @@ export default function TrackFlightPage() {
         paymentData={{
           bookingId: booking?.id || '',
           userId: booking?.user_id || '',
-          amount: 1, // Use test amount of $1 for testing with tracked flights
-          currency: 'USD', // Use USD for testing
+          amount: flight?.price || 0, // Use actual flight price for live payments
+          currency: flight?.currency || 'EUR', // Use flight currency
           flightNumber: flight?.flight_number || '',
           passengerName: booking?.passenger_name || ''
         }}

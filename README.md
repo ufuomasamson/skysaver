@@ -94,12 +94,17 @@ open http://localhost:3000/test-supabase
 ### 6. Payment Configuration
 1. Go to `/admin/dashboard` in your app
 2. Add your Paystack API keys:
+   - `live_secret` (for production) ⚠️ **REQUIRED FOR LIVE PAYMENTS**
+   - `live_public` (for production) ⚠️ **REQUIRED FOR LIVE PAYMENTS**
    - `test_secret` (for development)
    - `test_public` (for development)
-   - `live_secret` (for production)
-   - `live_public` (for production)
 3. Configure crypto wallet addresses for crypto payments
 4. Save the configuration
+
+**🔴 IMPORTANT**: This application is configured for LIVE payments. Make sure to:
+- Add your live Paystack API keys in the admin dashboard
+- Test thoroughly in development before going live
+- Ensure your Paystack account is verified and can accept live payments
 
 ### 7. Start Development Server
 ```bash
@@ -170,14 +175,18 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
 ## 🧪 Testing
 
-### Payment Testing
-Use Paystack test cards:
+### Payment Testing (Development Only)
+**Note: The application is now configured for LIVE payments. Only use test cards in development mode.**
+
+For development testing, use Paystack test cards:
 - **Visa**: 4084084084084081 
 - **Mastercard**: 5200000000000007
 - **Verve**: 5060000000000000005
 
+**⚠️ PRODUCTION WARNING**: In production, all payments are processed with real money using live Paystack API keys.
+
 ### Debug Endpoints
-- `http://localhost:3000/paystack-debug` - Check Paystack setup and test payments
+- `http://localhost:3000/paystack-debug` - Check Paystack setup and configuration
 - `http://localhost:3000/payment-test` - Test payment flow with currency conversion
 - `http://localhost:3000/test-supabase` - Test database connection
 

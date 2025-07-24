@@ -250,7 +250,7 @@ export default function SearchPage() {
                     <div className="text-right">
                       <div className="text-2xl font-bold text-[#cd7e0f] mb-2">{formatPrice(flight.price)}</div>
                       <a
-                        href={`/pay/${flight.tracking_number}`}
+                        href={`/track?tracking_number=${flight.tracking_number}`}
                         className="bg-[#18176b] text-white px-6 py-2 rounded-lg hover:bg-[#18176b]/90 transition"
                       >
                         Book Now
