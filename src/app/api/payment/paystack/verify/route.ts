@@ -1,6 +1,23 @@
 import { NextResponse } from 'next/server';
-import { PaystackService } from '@/lib/paystackService';
+import https from 'https';
 import { createServerSupabaseClient, TABLES } from '@/lib/supabaseClient';
+
+// Helper function to fetch Paystack secret key from database
+async function getPaystackSecretKey(): Promise<string> {
+  const supabase = createServerSupabaseClient();
+  
+  const { data: keys, error } = await supabase
+    .from(TABLES.PAYMENT_GATEWAYS)
+    .select('*')
+    .eq('name', 'paystack')
+    .eq('type', 'live_secret'); // Use live key for production
+
+  if (error || !keys || keys.length === 0) {
+    throw new Error('Paystack live secret key not found. Please configure in admin dashboard.');
+  }
+
+  return keys[0].api_key;
+}
 
 export async function POST(request: Request) {
   try {
@@ -15,8 +32,20 @@ export async function POST(request: Request) {
 
     console.log('Verifying Paystack payment with reference:', reference);
 
-    // Verify payment with Paystack
-    const verificationResult = await PaystackService.verifyPayment(reference);
+    // Get Paystack secret key from database
+    let PAYSTACK_SECRET_KEY;
+    try {
+      PAYSTACK_SECRET_KEY = await getPaystackSecretKey();
+    } catch (keyError) {
+      console.error('Failed to get Paystack secret key:', keyError);
+      return NextResponse.json({
+        success: false,
+        error: 'Paystack configuration not found. Please configure API keys in admin dashboard.'
+      }, { status: 500 });
+    }
+
+    // Verify payment with Paystack using direct HTTPS request
+    const verificationResult = await makePaystackRequest(`/transaction/verify/${reference}`, null, PAYSTACK_SECRET_KEY, 'GET');
 
     if (!verificationResult.status) {
       return NextResponse.json({
@@ -82,10 +111,10 @@ export async function POST(request: Request) {
     }
 
     // Verify amount matches (convert from kobo)
-    const paidAmountInOriginalCurrency = PaystackService.convertKoboToAmount(
-      paymentData.amount, 
-      paymentData.currency
-    );
+    // Paystack returns amounts in kobo (for NGN) or smallest currency unit
+    const paidAmountInOriginalCurrency = paymentData.currency === 'NGN' 
+      ? paymentData.amount / 100  // Convert kobo to naira
+      : paymentData.amount / 100; // Convert cents to main currency unit
     
     const expectedAmount = booking.flight_amount || booking.flights?.price || 0;
     
@@ -182,4 +211,49 @@ export async function POST(request: Request) {
       error: error.message || 'Payment verification failed'
     }, { status: 500 });
   }
+}
+
+// Helper function to make requests to Paystack API
+function makePaystackRequest(endpoint: string, data: any, secretKey: string, method: string = 'POST'): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const postData = data ? JSON.stringify(data) : '';
+    
+    const options = {
+      hostname: 'api.paystack.co',
+      port: 443,
+      path: endpoint,
+      method: method,
+      headers: {
+        'Authorization': `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+        ...(method === 'POST' && { 'Content-Length': Buffer.byteLength(postData) })
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let responseData = '';
+
+      res.on('data', (chunk) => {
+        responseData += chunk;
+      });
+
+      res.on('end', () => {
+        try {
+          const parsedResponse = JSON.parse(responseData);
+          resolve(parsedResponse);
+        } catch (error) {
+          reject(new Error('Failed to parse Paystack response'));
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    if (method === 'POST' && postData) {
+      req.write(postData);
+    }
+    req.end();
+  });
 }
