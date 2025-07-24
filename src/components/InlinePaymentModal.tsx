@@ -182,6 +182,67 @@ export default function InlinePaymentModal({
           });
           break;
 
+        case 'open_url':
+          // Handle 3D Secure authentication
+          if (data.url) {
+            // Open 3D Secure URL in a new window/tab
+            const authWindow = window.open(data.url, '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            setCurrentStep({ 
+              step: 'processing', 
+              message: 'Please complete 3D Secure authentication in the new window. This page will update automatically.',
+              reference: data.reference
+            });
+            
+            // Start polling for payment status
+            const pollPaymentStatus = setInterval(async () => {
+              try {
+                const statusResponse = await fetch(`/api/payment/paystack/verify`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ reference: data.reference })
+                });
+                
+                const statusResult = await statusResponse.json();
+                
+                if (statusResult.status === 'success' && statusResult.data?.status === 'success') {
+                  clearInterval(pollPaymentStatus);
+                  if (authWindow) authWindow.close();
+                  
+                  setCurrentStep({ 
+                    step: 'success', 
+                    message: 'Payment successful!',
+                    reference: data.reference 
+                  });
+                  setTimeout(() => {
+                    onSuccess(data.reference);
+                    onClose();
+                  }, 2000);
+                } else if (statusResult.status === 'failed') {
+                  clearInterval(pollPaymentStatus);
+                  if (authWindow) authWindow.close();
+                  throw new Error('3D Secure authentication failed');
+                }
+              } catch (error) {
+                clearInterval(pollPaymentStatus);
+                if (authWindow) authWindow.close();
+                throw error;
+              }
+            }, 3000); // Poll every 3 seconds
+            
+            // Stop polling after 5 minutes
+            setTimeout(() => {
+              clearInterval(pollPaymentStatus);
+              if (authWindow) authWindow.close();
+              setCurrentStep({ 
+                step: 'error', 
+                message: 'Authentication timeout. Please try again.' 
+              });
+            }, 300000); // 5 minutes
+          } else {
+            throw new Error('3D Secure URL not provided');
+          }
+          break;
+
         case 'success':
           setCurrentStep({ 
             step: 'success', 
@@ -195,7 +256,7 @@ export default function InlinePaymentModal({
           break;
 
         default:
-          throw new Error('Unexpected payment status');
+          throw new Error(`Unexpected payment status: ${status}`);
       }
 
     } catch (error: any) {

@@ -198,6 +198,17 @@ export async function POST(request: Request) {
           }
         });
 
+      case 'open_url':
+        return NextResponse.json({
+          success: true,
+          status: 'open_url',
+          data: {
+            reference: data.reference,
+            url: data.url,
+            message: '3D Secure authentication required'
+          }
+        });
+
       default:
         return NextResponse.json({
           success: false,
