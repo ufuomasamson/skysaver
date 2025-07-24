@@ -134,3 +134,5 @@ temp/
 # Payment keys (if any are accidentally committed)
 *payment*key*
 *flutterwave*key*
+
+.vercel

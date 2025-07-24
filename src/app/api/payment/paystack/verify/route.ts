@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import https from 'https';
 import { createServerSupabaseClient, TABLES } from '@/lib/supabaseClient';
+import { PaymentLogger } from '@/lib/logger';
 
 // Helper function to fetch Paystack secret key from database
 async function getPaystackSecretKey(): Promise<string> {
@@ -20,24 +21,40 @@ async function getPaystackSecretKey(): Promise<string> {
 }
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
+  let reference = 'unknown';
+  
   try {
-    const { reference } = await request.json();
+    // Parse request body
+    const requestBody = await request.json();
+    reference = requestBody.reference;
+    
+    PaymentLogger.paymentStart(reference, { 
+      url: request.url,
+      method: request.method,
+      headers: {
+        'content-type': request.headers.get('content-type'),
+        'user-agent': request.headers.get('user-agent')
+      }
+    });
 
     if (!reference) {
+      PaymentLogger.error('Missing transaction reference in request', { requestBody });
       return NextResponse.json({
         success: false,
         error: 'Transaction reference is required'
       }, { status: 400 });
     }
 
-    console.log('Verifying Paystack payment with reference:', reference);
+    PaymentLogger.debug('Processing payment verification', { reference });
 
     // Get Paystack secret key from database
     let PAYSTACK_SECRET_KEY;
     try {
       PAYSTACK_SECRET_KEY = await getPaystackSecretKey();
+      PaymentLogger.debug('Successfully retrieved Paystack secret key from database');
     } catch (keyError) {
-      console.error('Failed to get Paystack secret key:', keyError);
+      PaymentLogger.error('Failed to get Paystack secret key', keyError);
       return NextResponse.json({
         success: false,
         error: 'Paystack configuration not found. Please configure API keys in admin dashboard.'
@@ -45,9 +62,19 @@ export async function POST(request: Request) {
     }
 
     // Verify payment with Paystack using direct HTTPS request
+    PaymentLogger.paystackRequest(`/transaction/verify/${reference}`, 'GET', reference);
     const verificationResult = await makePaystackRequest(`/transaction/verify/${reference}`, null, PAYSTACK_SECRET_KEY, 'GET');
+    
+    PaymentLogger.paystackResponse(`/transaction/verify/${reference}`, 200, {
+      status: verificationResult.status,
+      message: verificationResult.message,
+      dataExists: !!verificationResult.data
+    });
 
     if (!verificationResult.status) {
+      PaymentLogger.paymentError(reference, new Error('Paystack verification failed'), {
+        paystackResponse: verificationResult
+      });
       return NextResponse.json({
         success: false,
         error: verificationResult.message || 'Payment verification failed'
@@ -56,21 +83,29 @@ export async function POST(request: Request) {
 
     const paymentData = verificationResult.data;
     if (!paymentData) {
+      PaymentLogger.paymentError(reference, new Error('No payment data received'), {
+        verificationResult
+      });
       return NextResponse.json({
         success: false,
         error: 'No payment data received from Paystack'
       }, { status: 400 });
     }
 
-    console.log('Paystack verification response:', {
+    PaymentLogger.debug('Paystack verification response received', {
+      reference,
       status: paymentData.status,
-      reference: paymentData.reference,
       amount: paymentData.amount,
-      currency: paymentData.currency
+      currency: paymentData.currency,
+      gateway_response: paymentData.gateway_response
     });
 
     // Check if payment was successful
     if (paymentData.status !== 'success') {
+      PaymentLogger.paymentError(reference, new Error(`Payment not successful: ${paymentData.status}`), {
+        paymentStatus: paymentData.status,
+        gateway_response: paymentData.gateway_response
+      });
       return NextResponse.json({
         success: false,
         error: `Payment was not successful. Status: ${paymentData.status}`,
@@ -84,6 +119,7 @@ export async function POST(request: Request) {
     const supabase = createServerSupabaseClient();
 
     // Find booking by transaction reference
+    PaymentLogger.debug('Looking up booking by transaction reference', { reference });
     const { data: booking, error: bookingError } = await supabase
       .from(TABLES.BOOKINGS)
       .select(`
@@ -103,12 +139,26 @@ export async function POST(request: Request) {
       .single();
 
     if (bookingError || !booking) {
-      console.error('Booking not found for reference:', reference, bookingError);
+      PaymentLogger.error('Booking not found for reference', { 
+        reference, 
+        error: bookingError,
+        errorCode: bookingError?.code,
+        errorMessage: bookingError?.message
+      });
       return NextResponse.json({
         success: false,
         error: 'Booking not found for this transaction'
       }, { status: 404 });
     }
+
+    PaymentLogger.debug('Booking found successfully', {
+      reference,
+      bookingId: booking.id,
+      userId: booking.user_id,
+      flightAmount: booking.flight_amount,
+      currency: booking.currency,
+      currentPaid: booking.paid
+    });
 
     // Verify amount matches (convert from kobo)
     // Paystack returns amounts in kobo (for NGN) or smallest currency unit
@@ -118,7 +168,8 @@ export async function POST(request: Request) {
     
     const expectedAmount = booking.flight_amount || booking.flights?.price || 0;
     
-    console.log('Amount verification:', {
+    PaymentLogger.debug('Amount verification starting', {
+      reference,
       paid_amount_kobo: paymentData.amount,
       paid_amount_converted: paidAmountInOriginalCurrency,
       expected_amount: expectedAmount,
@@ -128,10 +179,12 @@ export async function POST(request: Request) {
     // Allow small differences due to currency conversion
     const amountDifference = Math.abs(paidAmountInOriginalCurrency - expectedAmount);
     if (amountDifference > 1) { // Allow 1 unit difference
-      console.error('Amount mismatch:', {
+      PaymentLogger.error('Amount mismatch detected', {
+        reference,
         paid: paidAmountInOriginalCurrency,
         expected: expectedAmount,
-        difference: amountDifference
+        difference: amountDifference,
+        currency: paymentData.currency
       });
       
       return NextResponse.json({
@@ -140,7 +193,15 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
+    PaymentLogger.debug('Amount verification passed', {
+      reference,
+      paidAmount: paidAmountInOriginalCurrency,
+      expectedAmount: expectedAmount,
+      difference: amountDifference
+    });
+
     // Update booking status to paid
+    PaymentLogger.debug('Updating booking status to paid', { reference, bookingId: booking.id });
     const { error: updateError } = await supabase
       .from(TABLES.BOOKINGS)
       .update({
@@ -154,14 +215,17 @@ export async function POST(request: Request) {
       .eq('id', booking.id);
 
     if (updateError) {
-      console.error('Failed to update booking:', updateError);
+      PaymentLogger.databaseOperation('update booking', 'BOOKINGS', false, updateError);
       return NextResponse.json({
         success: false,
         error: 'Failed to update booking status'
       }, { status: 500 });
     }
 
+    PaymentLogger.databaseOperation('update booking', 'BOOKINGS', true);
+
     // Create a payment record for revenue tracking
+    PaymentLogger.debug('Creating payment record', { reference, bookingId: booking.id });
     const { error: paymentError } = await supabase
       .from(TABLES.PAYMENTS)
       .insert({
@@ -178,16 +242,19 @@ export async function POST(request: Request) {
       });
 
     if (paymentError) {
-      console.error('Failed to create payment record:', paymentError);
+      PaymentLogger.databaseOperation('insert payment', 'PAYMENTS', false, paymentError);
       // Don't fail the whole operation if payment record creation fails
       // The booking is still updated successfully
+    } else {
+      PaymentLogger.databaseOperation('insert payment', 'PAYMENTS', true);
     }
 
-    console.log('Payment verified and booking updated successfully:', {
-      booking_id: booking.id,
+    const processingTime = Date.now() - startTime;
+    PaymentLogger.paymentSuccess(reference, {
+      bookingId: booking.id,
       amount: paidAmountInOriginalCurrency,
       currency: paymentData.currency,
-      reference: reference
+      processingTimeMs: processingTime
     });
 
     return NextResponse.json({
@@ -205,7 +272,11 @@ export async function POST(request: Request) {
     });
 
   } catch (error: any) {
-    console.error('Paystack payment verification error:', error);
+    const processingTime = Date.now() - startTime;
+    PaymentLogger.paymentError(reference, error, {
+      processingTimeMs: processingTime,
+      errorStack: error.stack
+    });
     return NextResponse.json({
       success: false,
       error: error.message || 'Payment verification failed'
@@ -230,8 +301,22 @@ function makePaystackRequest(endpoint: string, data: any, secretKey: string, met
       }
     };
 
+    PaymentLogger.debug('Making Paystack API request', {
+      endpoint,
+      method,
+      hostname: options.hostname,
+      hasAuth: !!secretKey,
+      hasData: !!data
+    });
+
     const req = https.request(options, (res) => {
       let responseData = '';
+
+      PaymentLogger.debug('Paystack response started', {
+        endpoint,
+        statusCode: res.statusCode,
+        headers: res.headers
+      });
 
       res.on('data', (chunk) => {
         responseData += chunk;
@@ -240,16 +325,41 @@ function makePaystackRequest(endpoint: string, data: any, secretKey: string, met
       res.on('end', () => {
         try {
           const parsedResponse = JSON.parse(responseData);
+          PaymentLogger.debug('Paystack response completed', {
+            endpoint,
+            statusCode: res.statusCode,
+            responseSize: responseData.length,
+            success: parsedResponse.status
+          });
           resolve(parsedResponse);
         } catch (error) {
+          PaymentLogger.error('Failed to parse Paystack response', {
+            endpoint,
+            responseData: responseData.substring(0, 500), // First 500 chars
+            parseError: error
+          });
           reject(new Error('Failed to parse Paystack response'));
         }
       });
     });
 
     req.on('error', (error) => {
+      PaymentLogger.error('Paystack request failed', {
+        endpoint,
+        error: error.message,
+        code: (error as any).code
+      });
       reject(error);
     });
+
+    req.on('timeout', () => {
+      PaymentLogger.error('Paystack request timeout', { endpoint });
+      req.destroy();
+      reject(new Error('Request timeout'));
+    });
+
+    // Set timeout to 30 seconds
+    req.setTimeout(30000);
 
     if (method === 'POST' && postData) {
       req.write(postData);
