@@ -143,7 +143,7 @@ export default function InlinePaymentModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: 'customer@example.com', // Use dummy email since we're not collecting it
-          amount: conversion.amountInKobo, // Amount in kobo (NGN subunit)
+          amount: conversion.convertedAmount, // Amount in NGN (API will convert to kobo)
           currency: 'NGN', // Always use NGN for Paystack
           bookingId: paymentData.bookingId,
           userId: paymentData.userId,
