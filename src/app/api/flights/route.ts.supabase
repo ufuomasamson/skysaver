@@ -1,0 +1,255 @@
+// Update the flights endpoint to use Supabase instead of MySQL
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
+
+export async function GET(req: NextRequest) {
+  try {
+    const url = req.url ? new URL(req.url) : null;
+    const trackingNumber = url?.searchParams.get('tracking_number');
+    
+    let query = supabase
+      .from('flights')
+      .select(`
+        *,
+        departure_location:departure_location_id(id, city, country),
+        arrival_location:arrival_location_id(id, city, country),
+        airline:airline_id(id, name, logo_url)
+      `);
+    
+    if (trackingNumber) {
+      query = query.eq('tracking_number', trackingNumber);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw error;
+    }
+    
+    if (trackingNumber) {
+      return NextResponse.json(data[0] || null);
+    }
+    
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error('Error fetching flights:', err);
+    return NextResponse.json(
+      { error: "Failed to fetch flights", details: String(err) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { 
+      airline, 
+      departure, 
+      arrival, 
+      price, 
+      passengerName, 
+      date,
+      time = "12:00" // Default time if not provided
+    } = body;
+
+    if (!airline || !departure || !arrival || !price || !passengerName || !date) {
+      return NextResponse.json(
+        { error: "All fields are required" }, 
+        { status: 400 }
+      );
+    }
+
+    console.log('Creating flight with data:', body);
+
+    // 1. Look up or create airline
+    let airlineId;
+    const { data: airlineData, error: airlineError } = await supabase
+      .from('airlines')
+      .select('id')
+      .eq('name', airline)
+      .limit(1);
+
+    if (airlineError) {
+      console.error('Error looking up airline:', airlineError);
+      return NextResponse.json(
+        { error: "Failed to process airline data" }, 
+        { status: 500 }
+      );
+    }
+
+    if (airlineData?.length) {
+      airlineId = airlineData[0].id;
+      console.log('Found existing airline:', airlineId);
+    } else {
+      // Create airline if it doesn't exist
+      const { data: newAirline, error: createAirlineError } = await supabase
+        .from('airlines')
+        .insert({ name: airline })
+        .select();
+
+      if (createAirlineError || !newAirline?.length) {
+        console.error('Error creating airline:', createAirlineError);
+        return NextResponse.json(
+          { error: "Failed to create airline" }, 
+          { status: 500 }
+        );
+      }
+
+      airlineId = newAirline[0].id;
+      console.log('Created new airline:', airlineId);
+    }
+
+    // 2. Look up or create departure location
+    let departureId;
+    const { data: departureData, error: departureError } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('city', departure)
+      .limit(1);
+
+    if (departureError) {
+      console.error('Error looking up departure location:', departureError);
+      return NextResponse.json(
+        { error: "Failed to process departure location" }, 
+        { status: 500 }
+      );
+    }
+
+    if (departureData?.length) {
+      departureId = departureData[0].id;
+      console.log('Found existing departure location:', departureId);
+    } else {
+      // Create location if it doesn't exist
+      const { data: newLocation, error: createLocationError } = await supabase
+        .from('locations')
+        .insert({ city: departure, country: 'Unknown' })
+        .select();
+
+      if (createLocationError || !newLocation?.length) {
+        console.error('Error creating departure location:', createLocationError);
+        return NextResponse.json(
+          { error: "Failed to create departure location" }, 
+          { status: 500 }
+        );
+      }
+
+      departureId = newLocation[0].id;
+      console.log('Created new departure location:', departureId);
+    }
+
+    // 3. Look up or create arrival location
+    let arrivalId;
+    const { data: arrivalData, error: arrivalError } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('city', arrival)
+      .limit(1);
+
+    if (arrivalError) {
+      console.error('Error looking up arrival location:', arrivalError);
+      return NextResponse.json(
+        { error: "Failed to process arrival location" }, 
+        { status: 500 }
+      );
+    }
+
+    if (arrivalData?.length) {
+      arrivalId = arrivalData[0].id;
+      console.log('Found existing arrival location:', arrivalId);
+    } else {
+      // Create location if it doesn't exist
+      const { data: newLocation, error: createLocationError } = await supabase
+        .from('locations')
+        .insert({ city: arrival, country: 'Unknown' })
+        .select();
+
+      if (createLocationError || !newLocation?.length) {
+        console.error('Error creating arrival location:', createLocationError);
+        return NextResponse.json(
+          { error: "Failed to create arrival location" }, 
+          { status: 500 }
+        );
+      }
+
+      arrivalId = newLocation[0].id;
+      console.log('Created new arrival location:', arrivalId);
+    }
+
+    // 4. Generate tracking number and create flight
+    const flightNumber = `FL-${Math.floor(Math.random() * 10000)}`;
+    const trackingNumber = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    const { data: flight, error: flightError } = await supabase
+      .from('flights')
+      .insert({
+        flight_number: flightNumber,
+        airline_id: airlineId,
+        departure_location_id: departureId,
+        arrival_location_id: arrivalId,
+        date,
+        time,
+        price: parseFloat(price),
+        passenger_name: passengerName,
+        tracking_number: trackingNumber,
+        status: 'scheduled'
+      })
+      .select(`
+        *,
+        departure_location:departure_location_id(city, country),
+        arrival_location:arrival_location_id(city, country),
+        airline:airline_id(name)
+      `);
+
+    if (flightError) {
+      console.error('Error creating flight:', flightError);
+      return NextResponse.json(
+        { error: "Failed to create flight", details: flightError.message }, 
+        { status: 500 }
+      );
+    }
+
+    console.log('Flight created successfully:', flight);
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: "Flight created successfully",
+      flight: flight[0]
+    });
+    
+  } catch (err) {
+    console.error('Error in POST /api/flights:', err);
+    return NextResponse.json(
+      { error: "Failed to create flight", details: String(err) }, 
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+    
+    if (!id) {
+      return NextResponse.json({ error: "Invalid flight ID" }, { status: 400 });
+    }
+    
+    const { error } = await supabase
+      .from('flights')
+      .delete()
+      .eq('id', id);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return NextResponse.json({ success: true, message: "Flight deleted successfully" });
+  } catch (err) {
+    console.error('Error deleting flight:', err);
+    return NextResponse.json(
+      { error: "Failed to delete flight", details: String(err) }, 
+      { status: 500 }
+    );
+  }
+}

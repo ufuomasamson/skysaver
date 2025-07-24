@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "name": "unitedair",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "MYSQL_HOST": "localhost",
+    "MYSQL_USER": "flightsdbuser",
+    "MYSQL_PASSWORD": "password123",
+    "MYSQL_DATABASE": "flights_db",
+    "NEXT_PUBLIC_BASE_URL": "https://unitedairline.vercel.app"
+  }
+} 

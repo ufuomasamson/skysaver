@@ -1,0 +1,604 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: #111; /* Ensuring base text is dark */
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #111; /* Darker title color */
+  font-weight: 600; /* Make title bolder */
+}
+
+.description {
+  font-size: 1rem;
+  color: #333; /* Darker description color */
+  margin-bottom: 2rem;
+}
+
+/* Tabs Styling */
+.tabsContainer {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #d0d0d0; /* Darker border */
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  color: #333; /* Darker inactive tab color */
+  font-weight: 500; /* Make tabs slightly bolder */
+}
+
+.tabButton:hover {
+  color: #0057b8; /* Darker hover color */
+}
+
+.activeTab {
+  border-bottom: 2px solid #0057b8; /* Darker active border */
+  color: #0057b8; /* Darker active color */
+  font-weight: 600; /* Make active tab bolder */
+}
+
+/* Button Styling */
+.actionBar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.button {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #0051b3;
+}
+
+.button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #d9d9d9;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background-color: #e6e6e6;
+}
+
+/* Error Styling */
+.errorContainer {
+  background-color: #fff1f0;
+  border: 1px solid #ffccc7;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.error {
+  color: #f5222d;
+  margin: 0;
+}
+
+/* Overview Tab */
+.overviewContainer {
+  background-color: #f0f2f5; /* Slightly darker background */
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #d9d9d9; /* Add border for better contrast */
+  color: #222; /* Ensure text is dark */
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statusCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+  padding: 1.5rem;
+  text-align: center;
+  color: #111; /* Ensure text is dark */
+  border: 1px solid #e0e0e0; /* Add subtle border */
+}
+
+.recommendationsContainer {
+  margin-top: 2rem;
+}
+
+.recommendationBox {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+  padding: 1.5rem;
+  color: #111; /* Ensure text is dark */
+  border: 1px solid #e0e0e0; /* Add subtle border */
+}
+
+.recommendationHeading {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #111; /* Darker text */
+  font-weight: 600; /* Bolder */
+}
+
+.recommendationsList {
+  padding-left: 1.5rem;
+  margin-bottom: 0;
+  color: #222; /* Darker text */
+}
+
+.recommendationsList li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5; /* Better line spacing */
+}
+
+.lastUpdated {
+  text-align: right;
+  font-size: 0.875rem;
+  color: #333; /* Even darker timestamp color */
+  margin-top: 1.5rem;
+  font-weight: 500; /* Slightly bolder */
+}
+
+/* Results Container */
+.resultsContainer {
+  background-color: #f0f2f5; /* Slightly darker background */
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0; /* Add border for better contrast */
+}
+
+.resultCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #111; /* Ensure text is dark */
+}
+
+/* Status Badges */
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem; /* Slightly larger */
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.success {
+  background-color: #e7f7e7; /* Darker green background */
+  border: 1px solid #7acc7a; /* Darker border */
+  color: #135e13; /* Much darker text for better contrast */
+}
+
+.error {
+  background-color: #ffebe9; /* Darker red background */
+  border: 1px solid #ff9b93; /* Darker border */
+  color: #b11d0c; /* Much darker text for better contrast */
+}
+
+.pending {
+  background-color: #e0f0ff; /* Darker blue background */
+  border: 1px solid #69a9ff; /* Darker border */
+  color: #0050b3; /* Much darker text for better contrast */
+}
+
+/* Data Sections */
+.dataSection {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f0f2f5; /* Slightly darker background */
+  border-radius: 0.25rem;
+  border: 1px solid #d9d9d9; /* Add border for better contrast */
+}
+
+.dataSection h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #0d0d0d; /* Very dark text */
+  font-weight: 600; /* Make heading bolder */
+}
+
+.dataSection pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 0.5rem;
+  background-color: #e8e8e8; /* Darker code background */
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  color: #121212; /* Very dark text for code */
+  border: 1px solid #ccc; /* Border for code blocks */
+}
+
+.rawData {
+  margin-top: 2rem;
+}
+
+.rawData pre {
+  background-color: #21252b; /* Better dark background */
+  color: #f0f0f0; /* Even brighter text for better contrast */
+  padding: 1rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  font-size: 0.9rem; /* Slightly larger */
+  border: 1px solid #505050; /* Lighter border for better definition */
+  line-height: 1.5; /* Improved line spacing */
+}
+
+/* Comparison Tab */
+.comparisonContainer {
+  background-color: #f0f2f5; /* Slightly darker background */
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0; /* Add border for better contrast */
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  color: #111; /* Ensure text is dark */
+  border: 1px solid #ccc; /* Add table border */
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #c5c5c5; /* Darker border */
+  border-right: 1px solid #c5c5c5; /* Add right border for better grid */
+}
+
+.comparisonTable th {
+  background-color: #e6e6e6; /* Darker header background */
+  font-weight: 600; /* Bolder header text */
+  color: #000; /* Black header text */
+}
+
+.apiServiceStatus {
+  margin-top: 2rem;
+}
+
+.statusTable {
+  overflow-x: auto;
+}
+
+.statusTable table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #c5c5c5; /* Add table border */
+  color: #111; /* Ensure text is dark */
+}
+
+.statusTable th,
+.statusTable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #c5c5c5; /* Darker border */
+  border-right: 1px solid #c5c5c5; /* Add right border for better grid */
+}
+
+.statusTable th {
+  background-color: #e6e6e6; /* Darker header background */
+  font-weight: 600; /* Bolder header text */
+  color: #000; /* Black header text */
+}
+
+.methodBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem; /* Slightly larger */
+  font-weight: 600; /* Make badge text bolder */
+  letter-spacing: 0.01em; /* Slightly improved legibility */
+}
+
+.regionBypass {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #0060b6; /* Darker blue */
+}
+
+.standard {
+  background-color: #f9f0ff;
+  border: 1px solid #d3adf7;
+  color: #531dab; /* Darker purple */
+}
+
+.mysql {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #389e0d; /* Darker green */
+}
+
+.successRates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.successRate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem; /* Slightly larger */
+  color: #222; /* Darker text */
+  font-weight: 500; /* Slightly bolder */
+}
+
+.successRate span:first-child {
+  width: 100px;
+}
+
+.successRate span:last-child {
+  width: 40px;
+  text-align: right;
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #1890ff;
+  border-radius: 4px;
+}
+
+/* Settings Tab */
+.settingsContainer {
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+.settingsCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.radioGroup {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #222; /* Darker text */
+  font-weight: 500; /* Slightly bolder */
+}
+
+.radioLabel input {
+  cursor: pointer;
+}
+
+.envInfo {
+  margin-top: 1rem;
+}
+
+.envItem {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.envLabel {
+  width: 200px;
+  font-weight: 500;
+}
+
+.envValue {
+  color: #333; /* Darker text color */
+  font-weight: 500; /* Slightly bolder */
+}
+
+/* Test Endpoints Page */
+.dropdown {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #bbb; /* Darker border */
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #222; /* Darker text */
+  background-color: #f5f5f5; /* Slightly darker background */
+}
+
+.customEndpointInput {
+  margin-top: 1rem;
+}
+
+.textInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #bbb; /* Darker border */
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  color: #222; /* Darker text */
+  background-color: #f5f5f5; /* Slightly darker background */
+}
+
+.noteCard {
+  background-color: #f0f0f0; /* Darker background */
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #d0d0d0; /* Darker border */
+  margin-bottom: 1rem;
+  color: #222; /* Ensure text is dark */
+}
+
+.noteCard h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.noteCard ul {
+  margin-bottom: 0;
+}
+
+.noteCard li {
+  margin-bottom: 0.5rem;
+}
+
+/* API Endpoint Tester */
+.endpointHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.smallButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.methodsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.methodCard {
+  background-color: #f5f5f5; /* Slightly darker background */
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #d5d5d5; /* Darker border */
+  color: #222; /* Ensure text is dark */
+}
+
+.methodHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.methodHeader h4 {
+  margin: 0;
+}
+
+.methodResults {
+  font-size: 0.9rem; /* Slightly larger */
+  color: #222; /* Dark text color */
+  line-height: 1.5; /* Better line spacing */
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.statusIndicator {
+  font-weight: 500;
+}
+
+.statusSuccess {
+  color: #389e0d; /* Darker green */
+  font-weight: 600; /* Bolder */
+}
+
+.statusError {
+  color: #cf1322; /* Darker red */
+  font-weight: 600; /* Bolder */
+}
+
+.resultPreview, .resultError {
+  margin-top: 1rem;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.previewHeader h5 {
+  margin: 0;
+  color: #111; /* Darker text */
+  font-weight: 600; /* Bolder */
+}
+
+.dataCount {
+  font-size: 0.75rem;
+  color: #555; /* Darker color */
+  font-weight: 500; /* Slightly bolder */
+}
+
+.previewCode {
+  background-color: #ebebeb; /* Darker background */
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem; /* Slightly larger */
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  color: #111; /* Very dark text */
+  border: 1px solid #ccc; /* Add border */
+}
+
+.errorCode {
+  background-color: #fff1f0;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem; /* Slightly larger */
+  color: #cf1322; /* Darker red */
+  margin: 0;
+  white-space: pre-wrap;
+  border: 1px solid #ffa39e; /* Add border */
+  line-height: 1.5; /* Better line spacing */
+}
+
+.loadingIndicator {
+  padding: 1rem 0;
+  text-align: center;
+  color: #1890ff;
+}
+
+.noResults {
+  padding: 1rem 0;
+  text-align: center;
+  color: #555; /* Darker text */
+  font-weight: 500; /* Slightly bolder */
+}

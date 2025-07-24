@@ -1,0 +1,37 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabaseClient, TABLES } from '@/lib/supabaseClient';
+
+export async function GET(request: NextRequest) {
+  try {
+    console.log('Fetching users using Supabase');
+    
+    // Get query parameters
+    const searchParams = request.nextUrl.searchParams;
+    const limit = Number(searchParams.get('limit') || '50');
+    const page = Number(searchParams.get('page') || '1');
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    
+    // Create server-side Supabase client
+    const supabase = createServerSupabaseClient();
+    
+    // Query users from Supabase's users table
+    const { data: users, error } = await supabase
+      .from(TABLES.USERS)
+      .select('*')
+      .range(from, to);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return NextResponse.json(users || []);
+  } catch (error) {
+    console.error('Error fetching users using Supabase:', error);
+    
+    return NextResponse.json(
+      { error: "Failed to fetch users", message: error.message },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE flights ADD COLUMN passenger_name VARCHAR(255) DEFAULT NULL;
