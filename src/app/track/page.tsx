@@ -83,7 +83,7 @@ export default function TrackFlightPage() {
       const { currency } = useCurrencyStore.getState();
       
       // Convert flight price to NGN for Paystack processing using centralized utility
-      const conversion = convertToNGN(flight.price, 'EUR'); // flight.price is in EUR base currency
+      const conversion = convertToNGN(flight.price, 'EUR'); // flight.price is stored in EUR base currency in database
       
       // Log conversion for debugging
       logConversion(conversion, 'Track Page Payment');
@@ -851,7 +851,7 @@ export default function TrackFlightPage() {
           bookingId: booking?.id || '',
           userId: booking?.user_id || '',
           amount: flight?.price || 0, // Use actual flight price for live payments
-          currency: flight?.currency || 'EUR', // Use flight currency
+          currency: flight?.currency || 'USD', // Use flight currency, default to USD
           flightNumber: flight?.flight_number || '',
           passengerName: booking?.passenger_name || ''
         }}

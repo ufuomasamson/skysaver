@@ -37,7 +37,7 @@ export default function PaymentButton({
   bookingId,
   userId,
   amount,
-  currency = 'EUR',
+  currency = 'USD',
   flightNumber,
   className = ''
 }: PaymentButtonProps) {

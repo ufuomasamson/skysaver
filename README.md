@@ -10,7 +10,7 @@ A modern, full-stack flight booking application built with Next.js, Supabase, an
 - **Flight Search & Booking** - Search flights by route, date, passengers, and class
 - **Real-time Flight Tracking** - Track flights using unique tracking numbers
 - **PDF Ticket Generation** - Automatic ticket generation after successful payment
-- **Multi-currency Support** - EUR, USD, GBP with real-time conversion
+- **Multi-currency Support** - USD (default), EUR, GBP with real-time conversion
 
 ### 💳 Payment Integration
 - **Paystack Payment Gateway** - Secure inline payment processing

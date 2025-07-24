@@ -3,7 +3,7 @@ import { supabase } from '@/supabaseClient';
 
 export async function POST(request: Request) {
   try {
-    const { currency = 'EUR', amount = 100 } = await request.json();
+    const { currency = 'USD', amount = 100 } = await request.json();
 
     // Get Flutterwave API keys
     const { data: apiKeys, error: keysError } = await supabase

@@ -3,7 +3,7 @@ import { getDB } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
-    const { bookingId, userId, amount, currency = 'EUR' } = await request.json();
+    const { bookingId, userId, amount, currency = 'USD' } = await request.json();
 
     if (!bookingId || !userId || !amount) {
       return NextResponse.json({

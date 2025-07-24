@@ -5,7 +5,7 @@ import { convertToNGN, getConversionDisplay } from '@/lib/currencyConversion';
 
 export default function PaymentDemoPage() {
   const [showModal, setShowModal] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('EUR');
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
 
   const demoPaymentData = {
     bookingId: 'demo-booking-123',

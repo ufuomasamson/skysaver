@@ -26,7 +26,7 @@ const currencySymbols = {
 export const useCurrencyStore = create<CurrencyState>((set, get) => ({
   currency: typeof window !== 'undefined' && window.localStorage.getItem('currency')
     ? window.localStorage.getItem('currency') as string
-    : 'EUR', // Default to EUR as requested
+    : 'USD', // Default to USD as requested
   exchangeRates,
   setCurrency: (currency) => {
     if (typeof window !== 'undefined') {

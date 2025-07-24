@@ -55,8 +55,8 @@ export default function Navigation({ user, userRole, currencies }: NavigationPro
           value={currency} 
           className="bg-[#18176b] text-white px-2 lg:px-3 py-1 rounded border border-white/20 hover:border-white/40 transition text-xs lg:text-sm"
         >
-          <option value="EUR">€ EUR</option>
           <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
           <option value="GBP">£ GBP</option>
         </select>
         
