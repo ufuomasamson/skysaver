@@ -83,11 +83,13 @@ export async function POST(request: Request) {
         expiry_year: card.expiry_year
       },
       callback_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`,
+      channels: ['card'],
       metadata: {
         booking_id: bookingId,
         user_id: userId,
         payment_method: 'inline_card',
-        cancel_action: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`
+        cancel_action: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`,
+        callback_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`
       }
     };
 
@@ -225,24 +227,18 @@ export async function POST(request: Request) {
         });
 
       case 'open_url':
-        // Add callback URL to the Paystack 3D Secure URL
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app';
-        const callbackUrl = `${baseUrl}/payment/callback?reference=${data.reference}`;
-        
-        // Modify the Paystack URL to include our callback
-        const paystackUrl = new URL(data.url);
-        paystackUrl.searchParams.set('callback_url', callbackUrl);
-        paystackUrl.searchParams.set('reference', data.reference);
-        
-        console.log('Modified Paystack 3D Secure URL:', paystackUrl.toString());
+        // For 3D Secure authentication, we need to use Paystack's standard flow
+        // The callback_url in the charge request should handle the redirect
+        console.log('3D Secure authentication required, original URL:', data.url);
         
         return NextResponse.json({
           success: true,
           status: 'open_url',
           data: {
             reference: data.reference,
-            url: paystackUrl.toString(),
-            message: '3D Secure authentication required'
+            url: data.url, // Use original Paystack URL
+            message: '3D Secure authentication required',
+            instructions: 'Complete authentication on Paystack and you will be redirected back'
           }
         });
 
