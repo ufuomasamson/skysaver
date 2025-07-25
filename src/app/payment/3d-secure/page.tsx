@@ -28,8 +28,17 @@ export default function ThreeDSecurePage() {
     setStatus('authenticating');
     setMessage('Redirecting to secure authentication...');
 
-    // Redirect to Paystack 3D Secure URL
-    window.location.href = url;
+    // Add reference parameter to the Paystack URL for tracking
+    const paystackUrl = new URL(url);
+    paystackUrl.searchParams.set('reference', urlRef);
+    paystackUrl.searchParams.set('callback_url', `${window.location.origin}/payment/callback?reference=${urlRef}`);
+
+    console.log('Redirecting to Paystack 3D Secure:', paystackUrl.toString());
+
+    // Short delay to show the loading state
+    setTimeout(() => {
+      window.location.href = paystackUrl.toString();
+    }, 1500);
   }, [searchParams]);
 
   const handleReturnToPayment = () => {

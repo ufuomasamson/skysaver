@@ -86,7 +86,8 @@ export async function POST(request: Request) {
       metadata: {
         booking_id: bookingId,
         user_id: userId,
-        payment_method: 'inline_card'
+        payment_method: 'inline_card',
+        cancel_action: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`
       }
     };
 
