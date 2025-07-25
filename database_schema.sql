@@ -1,4 +1,4 @@
--- Supabase Schema for United Airlines Application
+-- Supabase Schema for Mazo Airways Application
 
 -- Enable Row Level Security (RLS) for all tables
 -- This is a Supabase security feature

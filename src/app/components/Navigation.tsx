@@ -93,7 +93,7 @@ export default function Navigation({ user, userRole, currencies }: NavigationPro
 
   return (
     <nav className="sticky top-0 z-50 bg-[#18176b] flex flex-wrap items-center justify-between px-4 sm:px-8 py-4">
-      <Link href="/" className="text-2xl font-bold text-white tracking-tight">United Airline</Link>
+      <Link href="/" className="text-2xl font-bold text-white tracking-tight">Mazo Airways</Link>
       {/* Currency Switcher - always visible */}
       <div className="flex items-center gap-2 w-full justify-center mt-2 md:mt-0 md:w-auto md:justify-end order-3 md:order-none">
         <select

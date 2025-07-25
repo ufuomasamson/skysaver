@@ -1,4 +1,4 @@
-# 🛫 United Airline
+# 🛫 Mazo Airways
 
 A modern, full-stack flight booking application built with Next.js, Supabase, and Paystack, Crypto payment integration.
 

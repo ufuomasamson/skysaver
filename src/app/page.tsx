@@ -226,7 +226,7 @@ export default function HomePage() {
           {/* Centered Hero Text */}
           <div className="w-full flex flex-col justify-center items-center py-8 sm:py-12 lg:py-20 text-center">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight text-white">A Lifetime Of Discounts? It's Genius.</h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-xl text-white">Get rewarded for your travels unlock savings of 10% or more with free United Airline account.</p>
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-xl text-white">Get rewarded for your travels unlock savings of 10% or more with free Mazo Airways account.</p>
           </div>
         </div>
       </section>
@@ -236,7 +236,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 lg:p-8">
             <div className="text-center mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#18176b] mb-2">UNITED AIRLINE</h2>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#18176b] mb-2">MAZO AIRWAYS</h2>
             </div>
             {/* Flight Booking Form */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
