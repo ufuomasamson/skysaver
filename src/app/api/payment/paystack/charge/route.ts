@@ -107,6 +107,30 @@ export async function POST(request: Request) {
 
     const { data } = paystackResponse;
     
+    // Store transaction reference in booking for verification
+    if (data.reference) {
+      try {
+        const supabase = createServerSupabaseClient();
+        const { error: updateError } = await supabase
+          .from('bookings')
+          .update({
+            transaction_ref: data.reference,
+            payment_status: 'processing',
+            payment_method: 'paystack'
+          })
+          .eq('id', bookingId);
+
+        if (updateError) {
+          console.error('Failed to store transaction reference:', updateError);
+          // Don't fail the payment, just log the error
+        } else {
+          console.log('Transaction reference stored:', data.reference);
+        }
+      } catch (error) {
+        console.error('Error storing transaction reference:', error);
+      }
+    }
+    
     // Store payment session for multi-step authentication (PIN/OTP)
     if (data.reference && (data.status === 'send_pin' || data.status === 'send_otp')) {
       try {
@@ -201,12 +225,23 @@ export async function POST(request: Request) {
         });
 
       case 'open_url':
+        // Add callback URL to the Paystack 3D Secure URL
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app';
+        const callbackUrl = `${baseUrl}/payment/callback?reference=${data.reference}`;
+        
+        // Modify the Paystack URL to include our callback
+        const paystackUrl = new URL(data.url);
+        paystackUrl.searchParams.set('callback_url', callbackUrl);
+        paystackUrl.searchParams.set('reference', data.reference);
+        
+        console.log('Modified Paystack 3D Secure URL:', paystackUrl.toString());
+        
         return NextResponse.json({
           success: true,
           status: 'open_url',
           data: {
             reference: data.reference,
-            url: data.url,
+            url: paystackUrl.toString(),
             message: '3D Secure authentication required'
           }
         });
