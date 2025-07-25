@@ -508,15 +508,31 @@ export default function AdminDashboard() {
         return sum + (isNaN(amount) ? 0 : amount);
       }, 0);
 
-      // Calculate total unpaid flight value (all flights that haven't been booked/paid)
-      const totalUnpaidFlightValue = Math.max(0, totalFlightValue - totalRevenue);
+      // Calculate total unpaid flight value (all flights that haven't been booked or paid for)
+      const unpaidFlightValue = safeFlights.reduce((sum: number, flight: any) => {
+        // Check if this flight has a paid booking
+        const hasPaidBooking = safeBookings.some((booking: any) => 
+          booking.flight_id === flight.id && booking.paid === true
+        );
+        
+        if (!hasPaidBooking) {
+          // Flight is not paid for, add its value
+          let price = flight.price;
+          if (price == null || price === '') return sum;
+          const num = parseFloat(parseFloat(String(price)).toFixed(2));
+          return sum + (isNaN(num) ? 0 : num);
+        }
+        
+        return sum;
+      }, 0);
       
       console.log('Admin Dashboard Debug:', {
         totalFlightValue,
         totalRevenue,
-        totalUnpaidFlightValue,
+        unpaidFlightValue,
         flightCount: safeFlights.length,
-        paymentCount: safePayments.length
+        paidBookingsCount: safeBookings.filter((b: any) => b.paid === true).length,
+        totalBookingsCount: safeBookings.length
       });
 
       setFlights(safeFlights);
@@ -529,7 +545,7 @@ export default function AdminDashboard() {
         totalLocations: locations.length || 0,
         totalBookings: safeBookings.length,
         totalRevenue: totalRevenue,
-        totalFlightValue: totalUnpaidFlightValue, // Show total unpaid flight value
+        totalFlightValue: unpaidFlightValue, // Show total unpaid flight value
         totalUsers: safeUsers.length,
         totalWallets: safeWallets.length,
         totalPaymentIntegrations: paymentIntegrations,

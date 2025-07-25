@@ -676,7 +676,7 @@ export default function TrackFlightPage() {
                       <h4 className="font-bold text-lg text-[#18176b]">Pay For Flight</h4>
                       <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
                         <div className="text-sm text-green-800">
-                          <strong>💳 Live Payment:</strong> You will be charged the actual flight price: {flight ? formatPrice(flight.price, flight.currency) : 'Loading...'}
+                          <strong>You will be charged the actual flight price:</strong> {flight ? formatPrice(flight.price, flight.currency) : 'Loading...'}
                         </div>
                       </div>
                       <button
