@@ -9,6 +9,7 @@ interface PaymentData {
   userId: string;
   amount: number;
   currency: string;
+  email?: string;
   flightNumber?: string;
   passengerName?: string;
 }
@@ -142,7 +143,7 @@ export default function InlinePaymentModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'customer@example.com', // Use dummy email since we're not collecting it
+          email: paymentData.email || 'customer@example.com', // Use actual user email or fallback
           amount: conversion.convertedAmount, // Amount in NGN (API will convert to kobo)
           currency: 'NGN', // Always use NGN for Paystack
           bookingId: paymentData.bookingId,

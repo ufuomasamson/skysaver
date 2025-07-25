@@ -260,6 +260,7 @@ export default function TrackFlightPage() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [flight, setFlight] = useState<any>(null);
   const [booking, setBooking] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -340,6 +341,8 @@ export default function TrackFlightPage() {
       if (userCookie) {
         try {
           const userObj = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
+          // Set user email for payment processing
+          setUserEmail(userObj.email || '');
           const bookingRes = await fetch(`/api/bookings?user_id=${userObj.id}&flight_id=${flightData.id}`);
           let bookingData = await bookingRes.json();
           // Always set booking to an object or null, never an array
@@ -850,6 +853,7 @@ export default function TrackFlightPage() {
         paymentData={{
           bookingId: booking?.id || '',
           userId: booking?.user_id || '',
+          email: userEmail, // Use actual user email
           amount: flight?.price || 0, // Use actual flight price for live payments
           currency: flight?.currency || 'USD', // Use flight currency, default to USD
           flightNumber: flight?.flight_number || '',

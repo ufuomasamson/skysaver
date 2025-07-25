@@ -12,6 +12,7 @@ export default function HomePage() {
   const [trackingNumber] = useState("");
   const [flight, setFlight] = useState<any>(null);
   const [booking, setBooking] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
@@ -42,6 +43,8 @@ export default function HomePage() {
       let userObj = null;
       if (userCookie) {
         userObj = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
+        // Set user email for payment processing
+        setUserEmail(userObj.email || '');
       }
 
       if (!userObj || !userObj.id) {
@@ -757,6 +760,7 @@ export default function HomePage() {
         paymentData={{
           bookingId: booking?.id || '',
           userId: booking?.user_id || '',
+          email: userEmail, // Use actual user email
           amount: selectedFlightForPayment?.price || 0,
           currency: useCurrencyStore.getState().currency,
           flightNumber: selectedFlightForPayment?.flight_number || '',
