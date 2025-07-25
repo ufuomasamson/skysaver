@@ -82,6 +82,7 @@ export async function POST(request: Request) {
         expiry_month: card.expiry_month,
         expiry_year: card.expiry_year
       },
+      callback_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`,
       metadata: {
         booking_id: bookingId,
         user_id: userId,

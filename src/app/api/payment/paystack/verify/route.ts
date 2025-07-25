@@ -7,15 +7,39 @@ import { PaymentLogger } from '@/lib/logger';
 async function getPaystackSecretKey(): Promise<string> {
   const supabase = createServerSupabaseClient();
   
+  PaymentLogger.debug('Querying database for Paystack secret key', {
+    table: TABLES.PAYMENT_GATEWAYS,
+    filters: { name: 'paystack', type: 'live_secret' }
+  });
+  
   const { data: keys, error } = await supabase
     .from(TABLES.PAYMENT_GATEWAYS)
     .select('*')
     .eq('name', 'paystack')
     .eq('type', 'live_secret'); // Use live key for production
 
-  if (error || !keys || keys.length === 0) {
+  if (error) {
+    PaymentLogger.error('Database error while fetching Paystack key', {
+      error: error.message,
+      code: error.code,
+      details: error.details
+    });
+    throw new Error(`Database error: ${error.message}`);
+  }
+
+  if (!keys || keys.length === 0) {
+    PaymentLogger.error('No Paystack live secret key found in database', {
+      keysFound: keys?.length || 0,
+      tableName: TABLES.PAYMENT_GATEWAYS
+    });
     throw new Error('Paystack live secret key not found. Please configure in admin dashboard.');
   }
+
+  PaymentLogger.debug('Paystack secret key found successfully', {
+    keyCount: keys.length,
+    keyId: keys[0].id,
+    keyExists: !!keys[0].api_key
+  });
 
   return keys[0].api_key;
 }
@@ -46,13 +70,34 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    PaymentLogger.debug('Processing payment verification', { reference });
+    PaymentLogger.debug('Processing payment verification', { 
+      reference,
+      referenceLength: reference?.length,
+      referenceType: typeof reference
+    });
+
+    // Validate reference format
+    if (!reference || typeof reference !== 'string' || reference.length < 5) {
+      PaymentLogger.error('Invalid transaction reference format', { 
+        reference,
+        length: reference?.length,
+        type: typeof reference
+      });
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid transaction reference format'
+      }, { status: 400 });
+    }
 
     // Get Paystack secret key from database
     let PAYSTACK_SECRET_KEY;
     try {
+      PaymentLogger.debug('Attempting to retrieve Paystack secret key from database');
       PAYSTACK_SECRET_KEY = await getPaystackSecretKey();
-      PaymentLogger.debug('Successfully retrieved Paystack secret key from database');
+      PaymentLogger.debug('Successfully retrieved Paystack secret key from database', {
+        keyLength: PAYSTACK_SECRET_KEY?.length,
+        keyPrefix: PAYSTACK_SECRET_KEY?.substring(0, 8) + '...'
+      });
     } catch (keyError) {
       PaymentLogger.error('Failed to get Paystack secret key', keyError);
       return NextResponse.json({
@@ -63,7 +108,32 @@ export async function POST(request: Request) {
 
     // Verify payment with Paystack using direct HTTPS request
     PaymentLogger.paystackRequest(`/transaction/verify/${reference}`, 'GET', reference);
-    const verificationResult = await makePaystackRequest(`/transaction/verify/${reference}`, null, PAYSTACK_SECRET_KEY, 'GET');
+    
+    let verificationResult;
+    try {
+      PaymentLogger.debug('About to call makePaystackRequest', { 
+        endpoint: `/transaction/verify/${reference}`,
+        method: 'GET'
+      });
+      
+      verificationResult = await makePaystackRequest(`/transaction/verify/${reference}`, null, PAYSTACK_SECRET_KEY, 'GET');
+      
+      PaymentLogger.debug('makePaystackRequest completed', {
+        hasResult: !!verificationResult,
+        resultStatus: verificationResult?.status,
+        resultMessage: verificationResult?.message
+      });
+    } catch (requestError) {
+      PaymentLogger.error('makePaystackRequest failed', {
+        reference,
+        error: requestError.message,
+        stack: requestError.stack
+      });
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to communicate with Paystack API'
+      }, { status: 500 });
+    }
     
     PaymentLogger.paystackResponse(`/transaction/verify/${reference}`, 200, {
       status: verificationResult.status,
