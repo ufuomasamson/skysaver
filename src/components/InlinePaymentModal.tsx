@@ -183,14 +183,11 @@ export default function InlinePaymentModal({
           break;
 
         case 'open_url':
-          // Handle 3D Secure authentication - redirect to dedicated page
+          // Handle 3D Secure authentication - redirect directly to Paystack
           if (data.url) {
-            // Construct the 3D Secure page URL with parameters
-            const returnUrl = encodeURIComponent(`${window.location.origin}/payment/callback?reference=${data.reference}`);
-            const threeDSecureUrl = `/payment/3d-secure?reference=${data.reference}&url=${encodeURIComponent(data.url)}&return_url=${returnUrl}`;
-            
-            // Redirect to 3D Secure authentication page
-            window.location.href = threeDSecureUrl;
+            console.log('Redirecting to Paystack 3D Secure:', data.url);
+            // Redirect directly to Paystack 3D Secure URL
+            window.location.href = data.url;
           } else {
             throw new Error('3D Secure URL not provided');
           }
