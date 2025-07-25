@@ -72,6 +72,9 @@ export async function POST(request: Request) {
     const amountInSmallestUnit = Math.round(amount * 100);
 
     // Prepare payload for Paystack charge
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app';
+    const callbackUrl = `${baseUrl}/payment/callback?reference=${Date.now()}_${bookingId}`;
+    
     const chargeData = {
       email,
       amount: amountInSmallestUnit,
@@ -82,14 +85,20 @@ export async function POST(request: Request) {
         expiry_month: card.expiry_month,
         expiry_year: card.expiry_year
       },
-      callback_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`,
+      callback_url: callbackUrl,
       channels: ['card'],
       metadata: {
         booking_id: bookingId,
         user_id: userId,
         payment_method: 'inline_card',
-        cancel_action: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`,
-        callback_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app'}/payment/callback`
+        callback_url: callbackUrl,
+        custom_fields: [
+          {
+            display_name: "Booking ID",
+            variable_name: "booking_id", 
+            value: bookingId
+          }
+        ]
       }
     };
 
@@ -227,18 +236,36 @@ export async function POST(request: Request) {
         });
 
       case 'open_url':
-        // For 3D Secure authentication, we need to use Paystack's standard flow
-        // The callback_url in the charge request should handle the redirect
+        // For 3D Secure authentication, modify the URL to ensure proper redirect
         console.log('3D Secure authentication required, original URL:', data.url);
+        
+        // Create a custom 3D Secure URL that includes our callback
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mazoairways.vercel.app';
+        const customCallbackUrl = `${baseUrl}/payment/callback?reference=${data.reference}&from=3ds`;
+        
+        // Try to append our callback to the 3DS URL if possible
+        let secureUrl = data.url;
+        try {
+          const urlObj = new URL(data.url);
+          urlObj.searchParams.set('callback_url', customCallbackUrl);
+          urlObj.searchParams.set('redirect_url', customCallbackUrl);
+          secureUrl = urlObj.toString();
+        } catch (e) {
+          // If URL modification fails, use original URL
+          console.log('Could not modify 3DS URL, using original');
+        }
         
         return NextResponse.json({
           success: true,
           status: 'open_url',
           data: {
             reference: data.reference,
-            url: data.url, // Use original Paystack URL
+            url: secureUrl,
+            callback_url: customCallbackUrl,
             message: '3D Secure authentication required',
-            instructions: 'Complete authentication on Paystack and you will be redirected back'
+            instructions: 'Complete authentication and you will be redirected back to our site',
+            fallback_url: `${baseUrl}/payment/complete?reference=${data.reference}`,
+            manual_verify_url: `${baseUrl}/verify-payment?reference=${data.reference}`
           }
         });
 
