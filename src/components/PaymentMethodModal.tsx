@@ -57,8 +57,8 @@ export default function PaymentMethodModal({
         if (paystackData.success && paystackData.configuration?.hasAnySecret) {
           gateways.push({ 
             id: 'paystack', 
-            name: 'Paystack', 
-            description: 'Secure payment via Paystack' 
+            name: 'Card Payment', 
+            description: 'Pay securely with your debit/credit card' 
           });
         }
       } catch (error) {

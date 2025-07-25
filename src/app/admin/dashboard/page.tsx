@@ -471,8 +471,45 @@ export default function AdminDashboard() {
         return sum + (isNaN(num) ? 0 : num);
       }, 0);
 
-      // Calculate unpaid flight value (Total Flight Value - Total Revenue)
-      const unpaidFlightValue = Math.max(0, totalFlightValue - totalRevenue);
+      // Calculate today's unpaid flight value (flights created today that haven't been booked/paid)
+      const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+      
+      const todaysFlights = safeFlights.filter((f: any) => {
+        if (!f.created_at) return false;
+        const flightDate = new Date(f.created_at).toISOString().split('T')[0];
+        return flightDate === today;
+      });
+
+      const todaysFlightValue = todaysFlights.reduce((sum: number, f: any) => {
+        let price = f.price;
+        if (price == null || price === '') return sum;
+        const num = parseFloat(parseFloat(String(price)).toFixed(2));
+        return sum + (isNaN(num) ? 0 : num);
+      }, 0);
+
+      // Calculate how much of today's flights have been paid for
+      const todaysRevenue = safePayments.filter((p: any) => {
+        if (!p.created_at) return false;
+        const paymentDate = new Date(p.created_at).toISOString().split('T')[0];
+        return paymentDate === today;
+      }).reduce((sum: number, p: any) => {
+        let amount = 0;
+        if (typeof p.amount === 'number') {
+          amount = p.amount;
+        } else if (typeof p.amount === 'string') {
+          amount = parseFloat(p.amount.trim());
+        }
+
+        // Convert NGN payments back to USD for display
+        if (p.currency === 'NGN' && p.payment_method === 'paystack') {
+          amount = amount / 1500;
+        }
+
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+
+      // Calculate total unpaid flight value (all flights that haven't been booked/paid)
+      const totalUnpaidFlightValue = Math.max(0, totalFlightValue - totalRevenue);
 
       setFlights(safeFlights);
       setAirlines(airlines || []);
@@ -484,7 +521,7 @@ export default function AdminDashboard() {
         totalLocations: locations.length || 0,
         totalBookings: safeBookings.length,
         totalRevenue: totalRevenue,
-        totalFlightValue: unpaidFlightValue, // Show unpaid flight value
+        totalFlightValue: totalUnpaidFlightValue, // Show total unpaid flight value
         totalUsers: safeUsers.length,
         totalWallets: safeWallets.length,
         totalPaymentIntegrations: paymentIntegrations,
@@ -909,32 +946,39 @@ export default function AdminDashboard() {
                   delay={200}
                 />
                 <MetricsCard
+                  title="Total Users"
+                  value={stats.totalUsers}
+                  icon="👥"
+                  color="from-cyan-500 to-blue-600"
+                  delay={100}
+                />
+                <MetricsCard
                   title="Total Bookings"
                   value={stats.totalBookings}
                   icon="📋"
                   color="from-indigo-500 to-indigo-700"
-                  delay={300}
+                  delay={200}
                 />
                 <MetricsCard
                   title="Total Wallets"
                   value={stats.totalWallets}
                   icon="💰"
                   color="from-yellow-500 to-orange-600"
-                  delay={400}
+                  delay={300}
                 />
                 <MetricsCard
                   title="Payment Integrations"
                   value={stats.totalPaymentIntegrations}
                   icon="💳"
                   color="from-pink-500 to-red-600"
-                  delay={500}
+                  delay={400}
                 />
                 <MetricsCard
                   title="Total Revenue"
                   value={stats.totalRevenue}
                   icon="💸"
                   color="from-emerald-500 to-green-600"
-                  delay={600}
+                  delay={500}
                   formatValue={(value) => `$${Number(value).toFixed(2)}`}
                 />
                 <MetricsCard
@@ -942,7 +986,7 @@ export default function AdminDashboard() {
                   value={stats.totalFlightValue}
                   icon="💡"
                   color="from-amber-500 to-yellow-600"
-                  delay={700}
+                  delay={600}
                   formatValue={(value) => `$${Number(value).toFixed(2)}`}
                 />
               </div>
