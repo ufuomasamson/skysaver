@@ -510,6 +510,14 @@ export default function AdminDashboard() {
 
       // Calculate total unpaid flight value (all flights that haven't been booked/paid)
       const totalUnpaidFlightValue = Math.max(0, totalFlightValue - totalRevenue);
+      
+      console.log('Admin Dashboard Debug:', {
+        totalFlightValue,
+        totalRevenue,
+        totalUnpaidFlightValue,
+        flightCount: safeFlights.length,
+        paymentCount: safePayments.length
+      });
 
       setFlights(safeFlights);
       setAirlines(airlines || []);

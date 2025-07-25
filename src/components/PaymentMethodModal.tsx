@@ -58,7 +58,7 @@ export default function PaymentMethodModal({
           gateways.push({ 
             id: 'paystack', 
             name: 'Card Payment', 
-            description: 'Pay securely with your debit/credit card' 
+            description: 'Pay securely with your debit/credit card'
           });
         }
       } catch (error) {

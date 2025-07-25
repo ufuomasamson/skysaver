@@ -717,8 +717,8 @@ export default function TrackFlightPage() {
             >
               <div className="flex items-center justify-between">
                 <div className="text-left">
-                  <div className="font-semibold text-gray-900 group-hover:text-[#18176b]">Paystack</div>
-                  <div className="text-sm text-gray-700">Pay with card or bank transfer</div>
+                  <div className="font-semibold text-gray-900 group-hover:text-[#18176b]">Card Payment</div>
+                  <div className="text-sm text-gray-700">Pay securely with your debit/credit card</div>
                   {currency && !['NGN', 'USD'].includes(currency) && (
                     <div className="text-xs text-amber-600 mt-1">
                       Note: Will be converted to NGN for payment
