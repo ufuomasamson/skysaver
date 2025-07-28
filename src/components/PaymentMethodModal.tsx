@@ -85,6 +85,13 @@ export default function PaymentMethodModal({
       gateways: availableGateways
     },
     {
+      id: 'bank_transfer',
+      name: 'Bank Transfer',
+      description: 'Transfer funds directly to our bank account',
+      icon: '🏦',
+      gateways: []
+    },
+    {
       id: 'crypto',
       name: 'Cryptocurrency',
       description: 'Pay with Bitcoin, Ethereum, or other cryptocurrencies',
@@ -95,7 +102,7 @@ export default function PaymentMethodModal({
 
   const handleMethodSelect = (methodId: string) => {
     setSelectedMethod(methodId);
-    if (methodId === 'crypto') {
+    if (methodId === 'crypto' || methodId === 'bank_transfer') {
       setSelectedGateway('');
     }
   };
@@ -107,12 +114,14 @@ export default function PaymentMethodModal({
   const handleProceed = () => {
     if (selectedMethod === 'crypto') {
       onSelectPayment('crypto');
+    } else if (selectedMethod === 'bank_transfer') {
+      onSelectPayment('bank_transfer');
     } else if (selectedMethod === 'card' && selectedGateway) {
       onSelectPayment('card', selectedGateway);
     }
   };
 
-  const canProceed = selectedMethod === 'crypto' || (selectedMethod === 'card' && selectedGateway);
+  const canProceed = selectedMethod === 'crypto' || selectedMethod === 'bank_transfer' || (selectedMethod === 'card' && selectedGateway);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -256,6 +265,25 @@ export default function PaymentMethodModal({
                         <p className="text-amber-800 text-sm font-medium">Manual Verification Required</p>
                         <p className="text-amber-700 text-xs mt-1">
                           Crypto payments require manual verification. You'll need to upload proof of payment.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bank Transfer Payment Info */}
+                {selectedMethod === 'bank_transfer' && (
+                  <div className="border-t bg-blue-50 p-4">
+                    <div className="flex items-start">
+                      <div className="text-blue-500 mr-2 mt-0.5">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-blue-800 text-sm font-medium">Bank Account Details Provided</p>
+                        <p className="text-blue-700 text-xs mt-1">
+                          You'll receive our bank account details to complete the transfer. Include your booking ID as reference.
                         </p>
                       </div>
                     </div>

@@ -100,6 +100,13 @@ export default function AdminDashboard() {
   const [paymentConfigError, setPaymentConfigError] = useState('');
   const [paymentConfigSuccess, setPaymentConfigSuccess] = useState('');
   
+  // --- Bank Details state ---
+  const [bankDetails, setBankDetails] = useState<string>('');
+  const [bankDetailsLoading, setBankDetailsLoading] = useState(false);
+  const [bankDetailsSaving, setBankDetailsSaving] = useState(false);
+  const [bankDetailsMessage, setBankDetailsMessage] = useState('');
+  const [bankDetailsError, setBankDetailsError] = useState('');
+  
   // Flutterwave state
   const [flutterwaveKeys, setFlutterwaveKeys] = useState({
     test_public: '',
@@ -128,6 +135,23 @@ export default function AdminDashboard() {
       setCryptoWallets(Array.isArray(data) ? data : []);
     } catch (e) {
       setCryptoWallets([]);
+    }
+  };
+
+  const fetchBankDetails = async () => {
+    setBankDetailsLoading(true);
+    try {
+      const response = await fetch('/api/admin/bank-details');
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        setBankDetails(data.data.details || '');
+      }
+    } catch (err) {
+      console.error('Error fetching bank details:', err);
+      setBankDetailsError('Failed to load bank details');
+    } finally {
+      setBankDetailsLoading(false);
     }
   };
   
@@ -223,6 +247,9 @@ export default function AdminDashboard() {
     fetchDashboardStats();
     fetchCryptoWallets();
     fetchAirlines();
+    if (selectedPage === 'bankDetails') {
+      fetchBankDetails();
+    }
     setLoading(false);
     // eslint-disable-next-line
   }, [router]);
@@ -231,6 +258,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (selectedPage === 'approvePayments') {
       fetchPendingPayments();
+    } else if (selectedPage === 'bankDetails') {
+      fetchBankDetails();
     }
   }, [selectedPage]);
 
@@ -353,6 +382,43 @@ export default function AdminDashboard() {
       setPaymentConfigError('Failed to save API keys');
     }
     setPaymentConfigLoading(false);
+  };
+
+  const handleSaveBankDetails = async () => {
+    // Validate required fields
+    if (!bankDetails.trim()) {
+      setBankDetailsError('Please enter bank details');
+      return;
+    }
+
+    setBankDetailsSaving(true);
+    setBankDetailsError('');
+    setBankDetailsMessage('');
+
+    try {
+      const response = await fetch('/api/admin/bank-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          details: bankDetails
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setBankDetailsMessage('Bank details saved successfully!');
+      } else {
+        setBankDetailsError(data.error || 'Failed to save bank details');
+      }
+    } catch (err) {
+      console.error('Error saving bank details:', err);
+      setBankDetailsError('Failed to save bank details');
+    } finally {
+      setBankDetailsSaving(false);
+    }
   };
 
   // Function to fetch pending payments
@@ -911,6 +977,12 @@ export default function AdminDashboard() {
                 className={`px-4 py-3 rounded-lg flex items-center gap-2 ${selectedPage === 'cryptoWallets' ? 'bg-[#cd7e0f] text-white' : 'text-white hover:bg-[#442743]'}`}
               >
                 <span>Crypto Wallets</span>
+              </button>
+              <button
+                onClick={() => setSelectedPage('bankDetails')}
+                className={`px-4 py-3 rounded-lg flex items-center gap-2 ${selectedPage === 'bankDetails' ? 'bg-[#cd7e0f] text-white' : 'text-white hover:bg-[#442743]'}`}
+              >
+                <span>Bank Details</span>
               </button>
               <button
                 onClick={() => setSelectedPage('integrations')}
@@ -1620,6 +1692,85 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {selectedPage === 'bankDetails' && (
+            <div className="p-8">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="p-6 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="h-6 w-6 text-blue-600">🏦</div>
+                      <h1 className="text-2xl font-bold text-gray-900">Bank Details Management</h1>
+                    </div>
+                    <p className="text-gray-600 mt-2">
+                      Configure bank account details that will be shown to customers when they select bank transfer payment option.
+                    </p>
+                  </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* Error/Success Messages */}
+                    {bankDetailsError && (
+                      <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                        <span>⚠️</span>
+                        <span>{bankDetailsError}</span>
+                      </div>
+                    )}
+
+                    {bankDetailsMessage && (
+                      <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                        <span>✅</span>
+                        <span>{bankDetailsMessage}</span>
+                      </div>
+                    )}
+
+                    {/* Bank Details Text Area */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Bank Account Details
+                      </label>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Enter the complete bank details exactly as you want customers to see them. Include all necessary information such as bank name, account name, account number, routing number, etc.
+                      </p>
+                      <textarea
+                        value={bankDetails}
+                        onChange={(e) => {
+                          setBankDetails(e.target.value);
+                          setBankDetailsMessage('');
+                          setBankDetailsError('');
+                        }}
+                        placeholder="Bank Name: First National Bank&#10;Account Name: Mazo Airways Inc.&#10;Account Number: 1234567890&#10;Routing Number: 021000021&#10;&#10;Additional Instructions:&#10;Please include your booking ID in the transfer description"
+                        rows={12}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-y"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        This text will be displayed exactly as entered to customers choosing bank transfer payment.
+                      </p>
+                    </div>
+
+                    {/* Preview */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <h3 className="font-medium text-gray-900 mb-3">Customer Preview:</h3>
+                      <div className="bg-white border border-gray-200 rounded p-4 text-sm font-mono whitespace-pre-line min-h-[120px]">
+                        {bankDetails || "No bank details configured yet..."}
+                      </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <div className="flex justify-end pt-4 border-t border-gray-200">
+                      <button
+                        onClick={handleSaveBankDetails}
+                        disabled={bankDetailsSaving || !bankDetails.trim()}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <span>💾</span>
+                        {bankDetailsSaving ? 'Saving...' : 'Save Bank Details'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

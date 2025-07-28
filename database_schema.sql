@@ -282,3 +282,26 @@ CREATE POLICY "Admins can manage all payments" ON payments
       SELECT id FROM auth.users WHERE raw_user_meta_data->>'role' = 'admin'
     )
   );
+
+-- Bank Details Table (for bank transfer payments)
+CREATE TABLE bank_details (
+  id SERIAL PRIMARY KEY,
+  details TEXT NOT NULL, -- Complete bank details as formatted text
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enable Row Level Security
+ALTER TABLE bank_details ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for bank details
+CREATE POLICY "Bank details are viewable by everyone" ON bank_details
+  FOR SELECT USING (true);
+  
+CREATE POLICY "Bank details are editable by admins" ON bank_details
+  FOR ALL USING (
+    auth.uid() IN (
+      SELECT id FROM auth.users WHERE raw_user_meta_data->>'role' = 'admin'
+    )
+  );

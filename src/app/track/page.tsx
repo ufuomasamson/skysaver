@@ -7,6 +7,7 @@ import { downloadTicket } from "@/lib/downloadTicket";
 import { useCurrencyStore } from "@/lib/currencyManager";
 import { useSearchParams } from "next/navigation";
 import InlinePaymentModal from "@/components/InlinePaymentModal";
+import BankTransferModal from "@/components/BankTransferModal";
 import { convertToNGN, logConversion } from "@/lib/currencyConversion";
 
 export default function TrackFlightPage() {
@@ -17,6 +18,7 @@ export default function TrackFlightPage() {
   const [selectedWallet, setSelectedWallet] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showInlinePaymentModal, setShowInlinePaymentModal] = useState(false);
+  const [showBankTransferModal, setShowBankTransferModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [proofFile, setProofFile] = useState<File|null>(null);
   const [submittingProof, setSubmittingProof] = useState(false);
@@ -45,6 +47,9 @@ export default function TrackFlightPage() {
     } else if (method === 'paystack') {
       // Open inline payment modal instead of redirecting
       setShowInlinePaymentModal(true);
+    } else if (method === 'bank_transfer') {
+      // Open bank transfer modal
+      setShowBankTransferModal(true);
     }
   };
 
@@ -733,6 +738,19 @@ export default function TrackFlightPage() {
             </button>
           )}
 
+          <button
+            onClick={() => handleSelectPaymentMethod('bank_transfer')}
+            className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-[#18176b] hover:bg-gray-50 transition-all duration-200 group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <div className="font-semibold text-gray-900 group-hover:text-[#18176b]">Bank Transfer</div>
+                <div className="text-sm text-gray-700">Transfer funds directly to our bank account</div>
+              </div>
+              <div className="text-2xl">🏦</div>
+            </div>
+          </button>
+
           {!availableGateways.crypto && !availableGateways.paystack && (
             <div className="text-center py-8 text-gray-700">
               No payment methods available at the moment.
@@ -861,6 +879,19 @@ export default function TrackFlightPage() {
         }}
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
+      />
+
+      {/* Bank Transfer Modal */}
+      <BankTransferModal
+        isOpen={showBankTransferModal}
+        onClose={() => setShowBankTransferModal(false)}
+        paymentData={{
+          bookingId: booking?.id || '',
+          amount: flight?.price || 0,
+          currency: flight?.currency || 'USD',
+          flightNumber: flight?.flight_number || '',
+          passengerName: booking?.passenger_name || ''
+        }}
       />
                 </div>
               </div>
