@@ -217,8 +217,21 @@ export default function HomePage() {
       <section className="relative min-h-[100vh] flex flex-col lg:flex-row items-center justify-center px-2 sm:px-4 md:px-8 overflow-hidden">
         {/* Video Background */}
         <div className="absolute inset-0 w-full h-full z-0">
+          {/* Mobile Video - Hidden on desktop */}
           <video
-            className="w-full h-full object-contain md:object-cover"
+            className="block md:hidden w-full h-full object-cover"
+            src="/images/mobile_bg.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              zIndex: -1
+            }}
+          />
+          {/* Desktop Video - Hidden on mobile */}
+          <video
+            className="hidden md:block w-full h-full object-cover"
             src="/images/Backgound-video.mp4"
             autoPlay
             loop
