@@ -345,15 +345,15 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="text-center p-6 border rounded-lg">
               <h3 className="text-lg font-semibold text-[#18176b] mb-2">International Flight</h3>
-              <p className="text-gray-600">Call FlyGlobe Inc via +447587623610 for booking assistance</p>
+              <p className="text-gray-600">Call MazoAirways via +13349484877 for booking assistance</p>
             </div>
             <div className="text-center p-6 border rounded-lg">
               <h3 className="text-lg font-semibold text-[#18176b] mb-2">Check Refund</h3>
-              <p className="text-gray-600">Contact contact@flyglobe.online for check refund status</p>
+              <p className="text-gray-600">Contact mazoairways@rwop.online for check refund status</p>
             </div>
             <div className="text-center p-6 border rounded-lg">
               <h3 className="text-lg font-semibold text-[#18176b] mb-2">Offer Deals</h3>
-              <p className="text-gray-600">FlyGlobe Inc Offer Deals Best Price Guarantee</p>
+              <p className="text-gray-600">MazoAirways Offer Deals Best Price Guarantee</p>
             </div>
           </div>
         </div>
@@ -431,7 +431,7 @@ export default function HomePage() {
         <div className="relative grid grid-cols-1 md:grid-cols-2">
           <div className="p-8 md:p-12 text-white flex flex-col justify-center">
             <h2 className="text-4xl font-bold mb-6">Your Great Destination</h2>
-            <p className="text-lg mb-8">Get rewarded for your travels with Mazol Inc  unlock instant savings of 10% or more with a free +447587623610 account</p>
+            <p className="text-lg mb-8">Get rewarded for your travels with MazoAirways  unlock instant savings of 10% or more with a free +13349484877 account</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
               <div className="flex items-center gap-4">
                 <svg className="w-10 h-10 text-[#d18a27]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.121-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.121-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M12 14a4 4 0 100-8 4 4 0 000 8z"></path></svg>
@@ -640,8 +640,8 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Contacts</h3>
               <p className="mb-2">102 Woodland Ave, 92922 TX CA United States</p>
-              <p className="mb-2">+447587623610</p>
-              <p>contact@flyglobe.online</p>
+              <p className="mb-2">+13349484877</p>
+              <p>mazoairways@rwop.online</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
@@ -652,7 +652,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-600 mt-8 pt-8 text-center">
-            <p>Copyright © 2022. All Rights Reserved By FlyGlobe Inc</p>
+            <p>Copyright © 2022. All Rights Reserved By MazoAirways</p>
           </div>
         </div>
       </footer>

@@ -145,7 +145,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <div className="font-semibold">Phone</div>
-                    <div className="text-gray-600">+447587623610</div>
+                    <div className="text-gray-600">+13349484877</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -154,7 +154,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <div className="font-semibold">Email</div>
-                    <div className="text-gray-600">contact@flyglobe.online</div>
+                    <div className="text-gray-600">mazoairways@rwop.online</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
