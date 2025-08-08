@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Use environment variables from .env.local
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pbapixvhgiawwslnoipx.supabase.co';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gxkuydbwmsyxoqaagftg.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYXBpeHZoZ2lhd3dzbG5vaXB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDY5MDIsImV4cCI6MjA2ODg4MjkwMn0.uPPoUnLmHfQQOz7OfiwONZEGdjdBubVXJB5zghxdUx8';
 
 console.log('Initializing Supabase with URL:', supabaseUrl);

@@ -13,7 +13,7 @@ if (!email) {
 }
 
 // Configure Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dderjvlsbmjpuptiqlhx.supabase.co';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gxkuydbwmsyxoqaagftg.supabase.co';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-role-key-here'; // Add your service role key here
 
 const supabase = createClient(supabaseUrl, supabaseKey);

@@ -22,8 +22,8 @@ export default function DirectSignupPage() {
 
     try {
       // Step 1: Use the Supabase REST API directly
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pbapixvhgiawwslnoipx.supabase.co';
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYXBpeHZoZ2lhd3dzbG5vaXB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMDY5MDIsImV4cCI6MjA2ODg4MjkwMn0.uPPoUnLmHfQQOz7OfiwONZEGdjdBubVXJB5zghxdUx8';
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gxkuydbwmsyxoqaagftg.supabase.co';
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4a3V5ZGJ3bXN5eG9xYWFnZnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTgwNzAsImV4cCI6MjA3MDIzNDA3MH0.MLs3cBKoDSd-UsJz9cKNAgLUhOZXy37BEPhdzd0sMxw';
       
       console.log("Signing up with direct REST API call");
       

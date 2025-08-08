@@ -3,7 +3,7 @@
 const { createClient } = require('@supabase/supabase-js');
 
 // Default Supabase URL from the project
-const SUPABASE_URL = 'https://pbapixvhgiawwslnoipx.supabase.co';
+const SUPABASE_URL = 'https://gxkuydbwmsyxoqaagftg.supabase.co';
 
 // Main function to set user as admin
 async function setAdminRole(email, serviceRoleKey) {

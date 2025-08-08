@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase credentials
-const SUPABASE_URL = 'https://pbapixvhgiawwslnoipx.supabase.co';
+const SUPABASE_URL = 'https://gxkuydbwmsyxoqaagftg.supabase.co';
 const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYXBpeHZoZ2lhd3dzbG5vaXB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzMwNjkwMiwiZXhwIjoyMDY4ODgyOTAyfQ.RbJSTyRgC0k7IOx-VL_imdVjlyyWW4jPP-LoTwWlcTI';
 
 async function runMigration() {
