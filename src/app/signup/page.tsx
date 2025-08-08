@@ -209,35 +209,6 @@ export default function SignupPage() {
               </a>
             </p>
           </div>
-          
-          {/* Debug tools */}
-          <div className="mt-6 border-t pt-4">
-            <p className="text-xs text-gray-500">Troubleshooting</p>
-            <div className="mt-1">
-              <a 
-                href="/debug" 
-                className="text-xs text-blue-600 hover:text-blue-800"
-                target="_blank"
-              >
-                Open Supabase Debug Page
-              </a>
-              <br />
-              <a 
-                href="/api/fix-database" 
-                className="text-xs text-blue-600 hover:text-blue-800"
-                target="_blank"
-              >
-                Fix Database Schema
-              </a>
-              <br />
-              <a 
-                href="/direct-signup" 
-                className="text-xs text-blue-600 hover:text-blue-800"
-              >
-                Try Alternative Signup Method
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </div>
