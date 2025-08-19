@@ -1,0 +1,1 @@
+ALTER TABLE flights ADD COLUMN tracking_number VARCHAR(32) DEFAULT NULL;

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #18176b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #6d1746;
+        }
+        .output {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cookie Authentication Test</h1>
+    
+    <h2>Current User Cookie</h2>
+    <pre id="currentCookie">Loading...</pre>
+    
+    <h2>Actions</h2>
+    <div>
+        <button id="refreshCookie">Refresh Cookie Display</button>
+        <button id="clearCookie">Clear User Cookie</button>
+    </div>
+    
+    <h2>Test Login</h2>
+    <form id="loginForm">
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+    
+    <h2>Output</h2>
+    <div class="output" id="output"></div>
+    
+    <script>
+        // Function to display the current user cookie
+        function displayUserCookie() {
+            const cookies = document.cookie.split(';');
+            let userCookie = null;
+            
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'user') {
+                    try {
+                        userCookie = JSON.parse(decodeURIComponent(value));
+                    } catch (e) {
+                        userCookie = value;
+                    }
+                }
+            }
+            
+            const cookieDisplay = document.getElementById('currentCookie');
+            if (userCookie) {
+                cookieDisplay.textContent = JSON.stringify(userCookie, null, 2);
+            } else {
+                cookieDisplay.textContent = 'No user cookie found';
+            }
+        }
+        
+        // Function to log messages to the output area
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // Set up event listeners
+        document.getElementById('refreshCookie').addEventListener('click', () => {
+            displayUserCookie();
+            log('Cookie display refreshed');
+        });
+        
+        document.getElementById('clearCookie').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/logout', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    log('Cookie cleared successfully');
+                    displayUserCookie();
+                } else {
+                    log('Failed to clear cookie: ' + await response.text());
+                }
+            } catch (error) {
+                log('Error clearing cookie: ' + error.message);
+            }
+        });
+        
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            log(`Attempting login with email: ${email}`);
+            
+            try {
+                // Import Supabase client (assuming you're using its CDN version)
+                const { createClient } = supabase;
+                
+                // Create a Supabase client
+                const supabaseUrl = window.location.origin + '/api/supabase-proxy';
+                const supabaseKey = 'public-anon-key'; // This doesn't matter since we're proxying
+                
+                const supabase = createClient(supabaseUrl, supabaseKey);
+                
+                // Sign in
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    log('Login failed: ' + error.message);
+                    return;
+                }
+                
+                log('Supabase login successful');
+                
+                // Set user cookie
+                try {
+                    const cookieResponse = await fetch('/api/set-user-cookie', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session: data })
+                    });
+                    
+                    if (cookieResponse.ok) {
+                        log('User cookie set successfully');
+                        displayUserCookie();
+                    } else {
+                        log('Failed to set user cookie: ' + await cookieResponse.text());
+                    }
+                } catch (cookieError) {
+                    log('Error setting user cookie: ' + cookieError.message);
+                }
+            } catch (error) {
+                log('Error during login: ' + error.message);
+            }
+        });
+        
+        // Display cookie on page load
+        displayUserCookie();
+    </script>
+    
+    <!-- Load Supabase JS for client-side auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</body>
+</html>
